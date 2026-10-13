@@ -15,94 +15,153 @@
 | 5. | Rafika Az Zahra Kusumastuti |
 ---
 
-## 📦 Link Image
+# Linux Digital Forensics Case Study
 
-| Item | Keterangan |
+**Jenis Kasus:** Simulasi investigasi filesystem Linux  
+**Filesystem:** ext4  
+**Format Image:** Raw disk image (`.img`)  
+**Format Distribusi:** GZIP (`.img.gz`)
+
+## 1. Deskripsi Proyek
+
+Kasus disusun dalam lingkungan simulasi dengan beberapa jenis artefak, yaitu:
+
+- File yang telah dihapus dari direktori.
+- File tersembunyi menggunakan konvensi nama Linux.
+- File yang isinya telah dimodifikasi.
+- Catatan aktivitas skenario yang dapat digunakan sebagai salah satu sumber informasi investigasi.
+- Salinan dokumen versi awal untuk membantu perbandingan perubahan.
+
+## 2. Tujuan Investigasi
+
+Investigator diharapkan mampu:
+
+1. Mengidentifikasi file yang dihapus, tersembunyi, atau dimodifikasi.
+2. Memeriksa metadata filesystem, termasuk ukuran file, permission, dan timestamp yang tersedia.
+3. Membandingkan dokumen versi awal dan versi akhir untuk menemukan perubahan.
+4. Mengidentifikasi username yang tercatat dalam bukti dan menilai kekuatan bukti tersebut.
+5. Menyusun timeline kejadian berdasarkan seluruh sumber yang tersedia.
+6. Memverifikasi integritas image menggunakan SHA-256.
+7. Menulis laporan investigasi yang dapat ditelusuri kembali ke bukti pendukung.
+
+## 3. Struktur File Distribusi
+
+```text
+Fordig-Week7/
+├── README.md
+├── linux_forensic_case.img.gz
+└── output/
+    ├── SHA256SUMS-IMAGE.txt
+    ├── SHA256SUMS-COMPRESSED.txt
+    └── SHA256SUMS.txt
+
+```
+
+Keterangan:
+
+| File | Fungsi |
 |---|---|
-| **Link Google Drive** | - |
-| **Nama file** | `kelompok4_linux.img.xz` |
-| **Ukuran terkompresi** | - |
-| **Ukuran setelah ekstrak** | - |
+| `linux_forensic_case.img.gz` | Image terkompresi untuk distribusi |
+| `SHA256SUMS-IMAGE.txt` | Hash SHA-256 image mentah hasil ekstraksi |
+| `SHA256SUMS-COMPRESSED.txt` | Hash SHA-256 file terkompresi |
+| `SHA256SUMS.txt` | Salinan hash image mentah untuk kemudahan verifikasi |
+| `README.md` | Dokumentasi dan petunjuk investigasi |
 
----
+## 4. Integritas Barang Bukti
 
-## 🔐 Integritas Bukti (SHA-256)
+SHA-256 digunakan untuk mendeteksi perubahan byte pada file image.
 
-Verifikasi hash **setelah ekstrak** untuk memastikan image tidak berubah:
+Sebelum melakukan analisis, investigator wajib:
 
-```
--
-```
+1. Mengunduh file image dan checksum.
+2. Menghitung hash file `.gz` yang diterima.
+3. Membandingkan hasilnya dengan `SHA256SUMS-COMPRESSED.txt`.
+4. Mengekstrak image.
+5. Menghitung hash image mentah.
+6. Membandingkan hasilnya dengan `SHA256SUMS-IMAGE.txt`.
+7. Mencatat hasil verifikasi dalam laporan.
 
-Cara verifikasi:
+Hash yang cocok menunjukkan bahwa file yang diperiksa memiliki nilai hash yang sama dengan acuan. Hash tidak membuktikan bahwa isi image sejak awal benar atau bahwa suatu aktivitas dilakukan oleh orang tertentu.
 
-```bash
-sha256sum kelompok4_linux.img
-```
+## 5. Persiapan Analisis
 
-Hasilnya harus identik dengan hash di atas.
+Dapat dilakukan menggunakan salah satu atau beberapa tool berikut:
 
----
+- **Autopsy:** antarmuka grafis untuk pemeriksaan filesystem, pencarian file, dan analisis artefak.
+- **Sleuth Kit:** kumpulan command-line tools untuk memeriksa filesystem dan metadata.
+- **Linux WSL/Ubuntu:** lingkungan kerja untuk ekstraksi, hashing, dan pemeriksaan dasar.
+- **Hex editor:** untuk memeriksa representasi byte ketika diperlukan.
 
-## 🖥️ Spesifikasi Image
+Gunakan salinan kerja dan pertahankan image asli dalam keadaan tidak berubah.
 
-| Properti | Nilai |
-|---|---|
-| Sistem operasi | Ubuntu <ISI_RELEASE, mis. 22.04 Jammy> (minimal / `debootstrap --variant=minbase`) |
-| Format image | Raw disk image (`.img`) |
-| Tabel partisi | MBR (msdos) |
-| Jumlah partisi | 1 partisi |
-| Filesystem | ext4 (label: `kelp4root`) |
-| Awal partisi | Sektor 2048 (offset 1 MiB = 1.048.576 byte) |
-| Hostname | `forensik-kelp4` |
-| Dibuat dengan | WSL2 Ubuntu, `losetup`, `parted`, `mkfs.ext4`, `debootstrap` |
+## 6. Ekstraksi Image
 
----
-
-## 🚀 Cara Menggunakan
-
-### 1. Ekstrak
+Pada Ubuntu atau WSL, jalankan:
 
 ```bash
-xz -d -k kelompok4_linux.img.xz
+gzip -dk linux_forensic_case.img.gz
 ```
 
-(User Windows bisa memakai 7-Zip.)
+Perintah tersebut menghasilkan `linux_forensic_case.img` tanpa menghapus file `.gz`.
 
-### 2. Lihat tabel partisi
+Verifikasi hash image mentah:
 
 ```bash
-mmls kelompok4_linux.img
+sha256sum linux_forensic_case.img
 ```
 
-### 3. Mount sebagai **read-only** (disarankan agar bukti tidak berubah)
+Pastikan nilai hash sesuai dengan checksum yang disediakan.
 
-```bash
-sudo mkdir -p /mnt/bukti
-sudo mount -o ro,loop,offset=$((2048*512)) kelompok4_linux.img /mnt/bukti
-# ... analisis ...
-sudo umount /mnt/bukti
-```
+## 7. Alur Investigasi
 
-> 💡 Bekerjalah pada **salinan** image, dan simpan image asli tetap utuh.
+Lakukan pemeriksaan dengan urutan berikut:
 
----
+### Tahap A: Pemeriksaan awal
 
-## 🎯 Tugas Analisis (Tugas B)
+- Catat nama file, ukuran, format, dan hash image.
+- Identifikasi filesystem.
+- Dokumentasikan tool dan versi yang digunakan.
 
-Dari image ini, temukan:
+### Tahap B: Pemeriksaan filesystem
 
-1. **File yang terhapus / tersembunyi / termodifikasi.**
-2. **Credential (username)** yang digunakan untuk melakukan perubahan tersebut, **kapan** kejadiannya, serta data lain yang dianggap relevan.
+- Telusuri struktur direktori.
+- Cari entri file yang tersembunyi.
+- Periksa entri file yang telah dihapus.
+- Periksa metadata dan permission file.
 
----
+### Tahap C: Analisis perubahan
 
-## 🧰 Tools yang Disarankan
+- Bandingkan dokumen versi awal dan versi akhir.
+- Gunakan hash untuk membandingkan integritas file.
+- Identifikasi bagian isi yang berubah.
+- Catat timestamp dan sumber informasi yang relevan.
 
-| Tujuan | Tool |
-|---|---|
-| Analisis partisi dan filesystem | The Sleuth Kit (`mmls`, `fls`, `istat`, `icat`) |
-| Analisis GUI | Autopsy |
-| File carving | `photorec`, `foremost` |
-| Pencarian string | `strings`, `grep` |
-| Mount image | `mount -o ro,loop`, `losetup` |
+### Tahap D: Analisis timeline dan username
+
+- Periksa catatan aktivitas yang tersedia.
+- Bandingkan waktu pada catatan dengan metadata filesystem.
+- Bedakan waktu modifikasi isi file, perubahan metadata, dan waktu pencatatan aktivitas.
+- Jangan menyimpulkan identitas pelaku hanya dari satu artefak.
+
+### Tahap E: Pelaporan
+
+Susun temuan dalam tabel yang memuat:
+
+- Nomor bukti.
+- Nama atau lokasi artefak.
+- Status file.
+- Temuan utama.
+- Username yang terindikasi.
+- Timestamp dan zona waktu.
+- Metode pemeriksaan.
+- Hash atau metadata pendukung.
+- Tingkat keyakinan dan keterbatasan kesimpulan.
+
+## 8. Prinsip Penanganan Bukti
+
+- Jangan memodifikasi image asli.
+- Kerjakan analisis pada salinan.
+- Catat hash sebelum dan sesudah proses yang relevan.
+- Dokumentasikan setiap langkah pemeriksaan.
+- Simpan output analisis secara terpisah.
+- Jangan mengklaim atribusi pengguna tanpa dukungan bukti yang memadai.
