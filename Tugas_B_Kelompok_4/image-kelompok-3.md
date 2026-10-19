@@ -3,8 +3,8 @@ Tugas_B_Kelompok_4/image-kelompok-3.md
 dokumentasi soal b
 
 - add data source di autopsy
+  
 <img width="558" height="421" alt="image" src="https://github.com/user-attachments/assets/36fc733d-d2c8-4ac2-8ee3-0d621518c4c0" />
-
 
 - klik extract file di dalam folder deleted files
   
@@ -14,7 +14,8 @@ dokumentasi soal b
   
 <img width="205" height="179" alt="image" src="https://github.com/user-attachments/assets/4073e8fd-2c38-4b00-8427-61881a571dcd" />
 
-dapat flag pertama
+- dapat flag pertama
+
 <img width="683" height="335" alt="image" src="https://github.com/user-attachments/assets/b8ac5d5a-9b74-4095-814b-4f01402dd64f" />
 
 'FLAG{W1ND0W5_D3L3T3D_F1L3_K3L3_8891}'
